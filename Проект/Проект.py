@@ -6,14 +6,15 @@ import bcrypt
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
-
 global USER
 USER = ''
+
 
 def main():
     db_session.global_init("db/kinoteatr.db")
     db_sess = db_session.create_session()
     app.run(port=8080, host='127.0.0.1')
+
 
 def buy_ticket(Login, card_num, seat, film_name):
     db_sess = db_session.create_session()
@@ -21,6 +22,7 @@ def buy_ticket(Login, card_num, seat, film_name):
     film_buys = film.buys
     film.buys = str(film_buys) + str(seat) + ';'
     db_sess.commit()
+
 
 def make_film(Name, Description, Cost, Time, Buys, Img):
     film = Film()
@@ -35,11 +37,13 @@ def make_film(Name, Description, Cost, Time, Buys, Img):
     db_sess.add(film)
     db_sess.commit()
 
+
 def delete_film(Name):
     db_sess = db_session.create_session()
     film = db_sess.query(Film).filter(Film.name == Name).first()
     db_sess.delete(film)
     db_sess.commit()
+
 
 def create_hash(password):
     password_bytes = password.encode()
@@ -48,11 +52,13 @@ def create_hash(password):
     password_hash_str = password_hash_bytes.decode()            
     return password_hash_str
 
+
 def if_password(password, hash_from_database):
     password_bytes = password.encode()
     hash_bytes = hash_from_database.encode()
     does_match = bcrypt.checkpw(password_bytes, hash_bytes)
     return does_match
+
 
 def make_user(Name, Login, Password):
     if Name != '' and Login != '' and Password != '':
@@ -69,6 +75,24 @@ def make_user(Name, Login, Password):
                 if Login == bdLogin:
                     k = 1
                     return '/error/Логин уже у кого-то есть, просим вас его заменить'
+                if len(Password) < 8:
+                    return '/error/Длина пароля должна быть не менее 8'
+                num = 0
+                blett = 0
+                lett = 0
+                for x in range(len(Password)):
+                    if Password[x] in '1234567890':
+                        num += 1
+                    elif Password[x] in 'qwertyuiopasdfghjkxcvbnёйцукенгшзхъфывапролджэячсмитьбю':
+                        lett += 1
+                    elif Password[x] in 'QWERTYUIOPASDFGHJKLZXCVBNMЁЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮ':
+                        blett += 1
+                if num == 0:
+                    return '/error/В пароле должны быть цифры'
+                elif lett == 0:
+                    return '/error/В пароле должны быть буквы в нижнем регистре'
+                elif blett == 0:
+                    return '/error/В пароле должны быть буквы в верхнем регистре'
             if k == 0:
                 user = User()
                 user.name = Name
@@ -79,16 +103,17 @@ def make_user(Name, Login, Password):
                 db_sess.commit()
                 return 'SIGNUP'
         else:
-            return 'NO ADMIN'
+            return '/error/Уберите слово admin из имени или логина'
     else:
-        return 'NO PARAM'
+        return '/error/Заполните все поля'
+
 
 def check_user(Logna, password):
     k = 0
     db_sess = db_session.create_session()
     usercount = len(db_sess.query(User).all())
     if Logna == '' or password == '':
-        return redirect('/error/Пароль и логин не должны быть пустыми')
+        return '/error/Пароль и логин не должны быть пустыми'
     else:
         for x in range(1, usercount + 1):
             if "admin" in Logna:
@@ -104,7 +129,8 @@ def check_user(Logna, password):
                     if okpassword:
                         return 'LOGIN'
         if k == 0:
-            return 'NO'
+            return '/error/Неправильный логин иили пароль'
+
 
 @app.route('/')
 def index():
@@ -128,6 +154,7 @@ def index():
     print(USER)
     return render_template('index.html', film=film)
 
+
 @app.route('/film/<film>')
 def film(film=''):
     global USER
@@ -142,6 +169,7 @@ def film(film=''):
     film_param['film_cost'] = db_sess.query(Film).filter(Film.name == film).one().cost
     film_param['film_img'] = db_sess.query(Film).filter(Film.name == film).one().img_1
     return render_template('film.html', **film_param)
+
 
 @app.route('/buy/<film>/<place>', methods=['GET', 'POST'])
 def buy(film='', place=0):
@@ -164,6 +192,7 @@ def buy(film='', place=0):
         buy_ticket(Log, Card, place, film)
         return redirect('/thanks/Спасибо за покупку билета')
 
+
 @app.route('/login', methods=["GET", "POST"])
 def login():
     global USER
@@ -172,15 +201,17 @@ def login():
     elif request.method == "POST":
         Log = request.form['login']
         Pass = request.form['password']
-        if check_user(Log, Pass) == 'ADMIN':
+        check_us = check_user(Log, Pass)
+        if check_us == 'ADMIN':
             USER = Log
             return redirect('/admin_main')
-        elif check_user(Log, Pass) == 'LOGIN':
+        elif check_us == 'LOGIN':
             USER = Log
             return redirect('/')
         else:
-            USER = Log
-            return redirect('/error/Неверный логин или пароль')
+            return redirect(check_us)
+
+
 
 @app.route('/signup', methods=["GET", "POST"])
 def signup():
@@ -195,9 +226,9 @@ def signup():
         if make_us == 'SIGNUP':
             USER = Log
             return redirect('/')
-        elif make_us == 'NO PARAM':
-            USER = Log
-            return redirect('/error/Заполните все поля')
+        else:
+            return redirect(make_us)
+
 
 @app.route('/admin_main')
 def admin_main():
@@ -218,6 +249,7 @@ def admin_main():
         film['film'][i - 1]['film_img'] = img
     return render_template('admin_main.html', film=film)
 
+
 @app.route('/create_film', methods=['GET', 'POST'])
 def create_film():
     if request.method == "GET":
@@ -236,22 +268,25 @@ def create_film():
         else:
             return redirect('/error/Все поля должны быть заполнены!')
 
+
 @app.route('/delete_film/<film>', methods=['GET', 'POST'])
 def del_film(film=''):
     if request.method == "GET":
         return render_template('delete_film.html', film=film)
     elif request.method == "POST":
-        print(film)
         delete_film(film)
         return thanks('/thanks/Фильм удален')
+
 
 @app.route('/error/<error>')
 def error(error=''):
     return render_template('error.html', error=error)
 
+
 @app.route('/thanks/<thanks>')
 def thank(thanks=''):
     return render_template('thanks.html', thanks=thanks)
+
 
 if __name__ == '__main__':
     main()
