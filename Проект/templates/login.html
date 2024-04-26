@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Вход</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+  </head>
+  <body>
+    <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between border-bottom" style="background-color: black; padding-bottom: 0px;">
+      <div class="col-md-3 mb-2 mb-md-0">
+        <a href="#" onclick="document.location='/'"><img src="https://static.vecteezy.com/system/resources/previews/000/437/475/original/vector-web-icon.jpg" height="100px" alt="Пример"></a>
+      </div>
+  
+      <div>
+        <h1 style="color: white;">Кинотеатр</h1>
+      </div>
+  
+      <div class="text-end" style="padding-right: 15px;">
+        <button type="button" class="btn btn-outline-light me-2" onclick="document.location='/login'">Войти</button>
+        <button type="button" class="btn btn-warning" style="padding-right: 15px;" onclick="document.location='/signup'">Зарегистрироваться</button>
+      </div>
+    </header>
+    </div>
+    <main>
+        <form style="text-align: center; margin: auto; height: 300px; width: 400px; border: 1px solid black; margin-top: 40px; border-radius: 20px;" method="POST">
+          <label style="margin-top: 10px; margin-bottom: 10px; border-radius: 10px;">Логин</label></br>
+          <input type="text" name="login" style="margin-top: 10px; margin-bottom: 10px; border-radius: 10px;"></br>
+          <label style="margin-top: 10px; margin-bottom: 10px;">Пароль</label></br>
+          <input type="password" name="password" style="margin-top: 10px; margin-bottom: 10px; border-radius: 10px;"></br>
+          <button style="margin-top: 10px; margin-bottom: 10px; border-radius: 10px;" class="btn btn-outline-dark me-2" type="submit">Войти</button>
+        </form>
+
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>
